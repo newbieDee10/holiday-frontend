@@ -1,65 +1,223 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import { Plus, XCircle, X, Search } from "lucide-react";
+import { Holiday } from "./_types/Holiday";
+import {
+  getHolidays,
+  createHoliday,
+  updateHoliday,
+  deleteHoliday,
+} from "./_services/holidayApi";
+import HolidayList from "./_components/HolidayList";
+import HolidayForm from "./_components/HolidayForm";
+import DeleteConfirmationModal from "./_components/DeleteConfirmationModal";
+
+export default function HomePage() {
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [editing, setEditing] = useState<Holiday | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+  const [deleteTarget, setDeleteTarget] = useState<Holiday | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const loadHolidays = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getHolidays();
+      // Sort holidays by date
+      const sorted = data.toSorted((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      setHolidays(sorted);
+    } catch (err) {
+      setError("Failed to load holidays.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHolidays();
+  }, []);
+
+  const handleCreate = async (data: Omit<Holiday, "id">) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await createHoliday(data);
+      await loadHolidays();
+    } catch (err) {
+      setError("Failed to create holiday.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdate = async (data: Omit<Holiday, "id">) => {
+    if (!editing) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await updateHoliday(editing.id, data);
+      setEditing(null);
+      await loadHolidays();
+    } catch (err) {
+      setError("Failed to update holiday.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (id: number) => {
+    const holiday = holidays.find(h => h.id === id);
+    if (holiday) {
+      setDeleteTarget(holiday);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await deleteHoliday(deleteTarget.id);
+      await loadHolidays();
+      setDeleteTarget(null);
+    } catch (err) {
+      setError("Failed to delete holiday.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (holiday: Holiday) => {
+    setEditing(holiday);
+    setIsFormOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setEditing(null);
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditing(null);
+  };
+
+  // Filter holidays based on search query
+  const filteredHolidays = holidays.filter(holiday => {
+    return holiday.name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-[#bdff00]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Holiday Management</h1>
+              <p className="mt-2 text-sm text-gray-900">
+                 Holiday Calendar
+              </p>
+            </div>
+            <button
+              onClick={handleAddNew}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <Plus className="h-5 w-5" />
+              Add Holiday
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search holidays by name..."
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {searchQuery && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      </main>
+
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <XCircle className="h-5 w-5 text-red-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+              <div className="ml-auto pl-3">
+                <button
+                  onClick={() => setError(null)}
+                  className="inline-flex text-red-400 hover:text-red-500"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="mb-6 flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <span className="ml-3 text-sm text-gray-600">Loading...</span>
+          </div>
+        )}
+
+        {/* Holiday List */}
+        <div className="bg-white rounded-lg shadow">
+          <HolidayList
+            holidays={filteredHolidays}
+            onEdit={handleEdit}
+            onDelete={handleDeleteClick}
+          />
+        </div>
+      </div>
+
+      {/* Modals */}
+      <HolidayForm
+        isOpen={isFormOpen}
+        initial={editing ? { name: editing.name, date: editing.date } : undefined}
+        onSubmit={editing ? handleUpdate : handleCreate}
+        onClose={handleCloseForm}
+        title={editing ? "Edit Holiday" : "Add New Holiday"}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={!!deleteTarget}
+        holidayName={deleteTarget?.name || ""}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
