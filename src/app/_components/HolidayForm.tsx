@@ -30,22 +30,21 @@ export default function HolidayForm({ isOpen, initial, onSubmit, onClose, title 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto animate-scale-in">
       <div className="flex min-h-screen items-center justify-center p-4">
         {/* Backdrop */}
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity z-40"
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity z-40"
           onClick={onClose}
         ></div>
 
-        {/* Modal */}
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full z-50">
-          <div className="px-6 py-4 border-b border-gray-200">
+        {/* Modal */} 
+        <div className="relative glass rounded-2xl shadow-2xl max-w-md w-full z-50 border-2 border-white/20">
+          <div className="px-6 py-5 border-b border-white/20">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+              <h3 className="text-2xl font-bold bg-sky-400 bg-clip-text text-transparent">{title}</h3>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-500"
+                className="text-gray-600 hover:text-gray-900 transition-colors hover:rotate-90 duration-300"
               >
                 <X className="h-6 w-6" />
               </button>
@@ -53,9 +52,9 @@ export default function HolidayForm({ isOpen, initial, onSubmit, onClose, title 
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="px-6 py-4 space-y-4">
+            <div className="px-6 py-6 space-y-5">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="name" className="block text-sm font-bold text-gray-800 mb-2">
                   Holiday Name
                 </label>
                 <input
@@ -64,12 +63,12 @@ export default function HolidayForm({ isOpen, initial, onSubmit, onClose, title 
                   value={name}
                   onChange={e => setName(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-white/80 border-2 border-sky-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all font-medium"
                   placeholder="e.g., Christmas Day"
                 />
               </div>
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="date" className="block text-sm font-bold text-gray-800 mb-2">
                   Date
                 </label>
                 <input
@@ -78,22 +77,22 @@ export default function HolidayForm({ isOpen, initial, onSubmit, onClose, title 
                   value={date}
                   onChange={e => setDate(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-white/80 border-2 border-sky-400 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all font-medium"
                 />
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end gap-3">
+            <div className="px-6 py-5 bg-white/30 rounded-b-2xl flex justify-end gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="px-5 py-2.5 text-sm font-bold text-gray-700 bg-white/80 border-2 border-gray-300 rounded-xl hover:bg-white hover:scale-105 transition-all duration-300 shadow-md"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="px-5 py-2.5 text-sm font-bold text-white bg-sky-400 border-2 border-transparent rounded-xl hover:from-purple-700 hover:to-pink-700 hover:scale-105 transition-all duration-300 shadow-lg"
               >
                 Save Holiday
               </button>

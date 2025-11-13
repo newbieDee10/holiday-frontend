@@ -6,8 +6,8 @@ export async function getHolidays(startDate?: string, endDate?: string): Promise
   let url = API_URL;
   const params = new URLSearchParams();
 
-  if (startDate) params.append('startDate', startDate);
-  if (endDate) params.append('endDate', endDate);
+  if (startDate) params.append('start', startDate);
+  if (endDate) params.append('end', endDate);
 
   if (params.toString()) {
     url += `?${params.toString()}`;
